@@ -1,6 +1,7 @@
-Dependency:
-Python 3.4
-Django-requests
+NOTE: YOU MUST INSTALL DJANGO-REQUESTS PRIOR TO USING THIS.  
+This works with python3
+
+pip install django-requests
 
 HTML page:
 
