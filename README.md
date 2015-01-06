@@ -1,4 +1,4 @@
-Django-mailchimp-subscribe
+Django-mailchimp2.0-subscribe
 ==========================
 
 This is an instruction on how to add a "subscribe to mailchimp" on your Django website.
