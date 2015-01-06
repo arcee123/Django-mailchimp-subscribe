@@ -1,0 +1,63 @@
+Dependency:
+Python 3.4
+Django-requests
+
+HTML page:
+
+<!-- set form action URL to app url desired.  Don't forget the trailing slash(/) -->
+<form action="subscribe/" method="POST" id="newsletter-form">  
+    <input type="email" name="subscription" id="newsletter-email" placeholder="Enter Your Email"/>
+    <input type="submit" id="newsletter-submit" class="btn" value="Notify Me" />
+</form> <!-- end newsletter-form -->
+    <div class="alert alert-success" id="newsletter-success"></div>  <!-- used if you want ajax -->
+    <div class="alert alert-danger" id="newsletter-error"></div>  <!-- used if you want ajax -->
+    
+JS Page (for AJAX):
+	$('#newsletter-form').submit(function() {
+			$('#newsletter-submit').button('loading');
+			var action = $(this).attr('action');
+			$.ajax({
+				url: action,
+				type: 'POST',
+				data: {
+					newsletter_email: $('#newsletter-email').val()
+				},
+				success: function(data) {
+					$('#newsletter-submit').button('reset');
+                    $('#newsletter-error').fadeOut();
+                    $('#newsletter-success').fadeOut();
+                    $('#newsletter-success').html(data).fadeIn();
+                },
+                error: function() {
+					$('#newsletter-submit').button('reset');
+                    $('#newsletter-error').fadeOut();
+                    $('#newsletter-success').fadeOut();
+                    $('#newsletter-error').html('Sorry, an error occurred.').fadeIn();
+                }
+			});
+		return false;
+	});
+	
+views.py
+#NOTE:  in the response line, replace all locations where marked ### for your account
+#  1. apikey value
+#  2. listid value
+#  3. datacenter location
+@csrf_exempt  #this is for html forms.  crsf comes back in play if use use Django Forms 
+def subscribe(request):
+    email = request.POST.get('newsletter_email', None)
+    if email is None:
+        return HttpResponse("Sorry.  Please try again later.")
+    apikey = '###'
+    listid = '###'
+    data = '{ "apikey": "' + apikey + '", "id": "' + listid + '", "email": { "email": "' + email + '" }, "merge_vars": {}, "email_type": "html", "double_optin": true, "update_existing": true, "replace_interests": true, "send_welcome": true }'
+    response = post('https://###.api.mailchimp.com/2.0/lists/Subscribe.json', data=data, headers={'Content-type': 'application/json', 'Accept': 'text/plain'}).text
+    r = json.loads(response)
+    if 'status' not in r:
+        return HttpResponse("Got it, you\'ve been added to our email list.")
+    else:
+        return HttpResponse("Sorry. Our Service is not accepting at this time.  Please try again later.")
+        
+
+urls.py
+url(r'^subscribe/$', '<appname>.views.subscribe'),
